@@ -41,13 +41,6 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Image"),
-        // actions: [
-        //   IconButton(
-        //       onPressed: () {
-        //         downloadImage();
-        //       },
-        //       icon: const Icon(Icons.file_download_outlined))
-        // ],
       ),
       body: Center(
         child: widget.imageUrl != null
