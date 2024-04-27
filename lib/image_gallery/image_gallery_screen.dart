@@ -8,6 +8,7 @@ class ImageGalleryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double displayWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Image gallery"),
@@ -23,11 +24,10 @@ class ImageGalleryScreen extends StatelessWidget {
                     controller: controller.scrollController,
                     padding: const EdgeInsets.all(16.0),
                     itemCount: controller.images.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 100.0,
-                            crossAxisSpacing: 10.0,
-                            mainAxisSpacing: 10.0),
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: displayWidth < 400 ? 100 : 250.0,
+                        crossAxisSpacing: 10.0,
+                        mainAxisSpacing: 10.0),
                     itemBuilder: (context, index) => InkWell(
                       onTap: () {
                         Get.to(() => ImageViewScreen(
@@ -43,7 +43,8 @@ class ImageGalleryScreen extends StatelessWidget {
                             image: DecorationImage(
                                 fit: BoxFit.cover,
                                 image: NetworkImage(
-                                    controller.images[index].previewURL ?? "")),
+                                    controller.images[index].largeImageURL ??
+                                        "")),
                           ),
                           child: Container(
                             decoration: const BoxDecoration(
