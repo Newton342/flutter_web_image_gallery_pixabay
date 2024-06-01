@@ -43,8 +43,7 @@ class ImageGalleryScreen extends StatelessWidget {
                             image: DecorationImage(
                                 fit: BoxFit.cover,
                                 image: NetworkImage(
-                                    controller.images[index].largeImageURL ??
-                                        "")),
+                                    controller.images[index].previewURL ?? "")),
                           ),
                           child: Container(
                             decoration: const BoxDecoration(

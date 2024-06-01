@@ -13,7 +13,6 @@ class ImageController extends GetxController {
   void onInit() {
     super.onInit();
     getImages();
-
     scrollController.addListener(() {
       if (scrollController.position.maxScrollExtent ==
           scrollController.offset) {
@@ -31,11 +30,6 @@ class ImageController extends GetxController {
   void getImages() async {
     isLoading = true;
     update();
-    // Uri url = Uri.parse(
-    //     "https://pixabay.com/api/?key=43423427-d18dfaf92065a4742211d156e&per_page=32&page=$page");
-    // http.Response response = await http.get(url);
-
-    // var data = jsonDecode(response.body);
     var data = await imageApi(page);
 
     List hit = data['hits'];

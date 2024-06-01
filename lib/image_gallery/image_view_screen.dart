@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 
 class ImageViewScreen extends StatefulWidget {
@@ -18,44 +18,76 @@ class ImageViewScreen extends StatefulWidget {
 }
 
 class _ImageViewScreenState extends State<ImageViewScreen> {
+  bool isDownloading = false;
+  set _isDownloadingState(bool value) => setState(() => isDownloading = value);
+
   void downloadImage() async {
-    print(widget.imageUrl?.split("/").last);
     var permission = await Permission.manageExternalStorage.status;
     if (permission.isDenied) {
       await Permission.manageExternalStorage.request();
     } else if (permission.isPermanentlyDenied) {
       await openAppSettings();
     } else {
-      final Directory? downloadsDir = await getDownloadsDirectory();
-
-      String imagePath =
-          "${downloadsDir?.path}${widget.imageUrl?.split("/").last}";
-      print(imagePath);
-      File image = File(imagePath);
-      await image.create();
+      String imagePath = "${widget.imageUrl?.split("/").last}";
+      String path = "/storage/emulated/0/Download/$imagePath";
+      File image = File(path);
+      if (widget.imageUrl != null) {
+        _isDownloadingState = true;
+        if (!image.existsSync()) {
+          http.Response response = await http.get(Uri.parse(widget.imageUrl!));
+          await image.writeAsBytes(response.bodyBytes).whenComplete(
+                () => viewSnackBar("File downloaded"),
+              );
+        } else {
+          viewSnackBar("File already exists");
+        }
+        _isDownloadingState = false;
+      }
     }
+  }
+
+  void viewSnackBar(String label) {
+    final snackBar = SnackBar(
+      content: Text(label),
+      behavior: SnackBarBehavior.floating,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        bottom: isDownloading
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(1.0),
+                child: LinearProgressIndicator(),
+              )
+            : null,
         title: const Text("Image"),
+        actions: [
+          !isDownloading
+              ? IconButton(
+                  onPressed: () => downloadImage(),
+                  icon: const Icon(Icons.download))
+              : const Offstage(),
+        ],
       ),
       body: Center(
-        child: widget.imageUrl != null
-            ? Hero(
-                tag: widget.index,
-                child: Image.network(widget.imageUrl!,
-                    loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }),
-              )
-            : const Text("No Image found"),
-      ),
+          child: Hero(
+        tag: widget.index,
+        child: Image.network(widget.imageUrl!,
+            errorBuilder: (context, error, stackTrace) {
+          return const Center(
+            child: Text("No image found"),
+          );
+        }, loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }),
+      )),
     );
   }
 }
