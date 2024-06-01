@@ -50,6 +50,7 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
     final snackBar = SnackBar(
       content: Text(label),
       behavior: SnackBarBehavior.floating,
+      duration: const Duration(milliseconds: 2000),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
